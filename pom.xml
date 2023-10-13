@@ -35,34 +35,13 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
-                        <manifestEntries>
-                            <Premain-Class>com.cn.agent.MyPreMainAgent</Premain-Class>
-                            <Can-Redefine-Classes>true</Can-Redefine-Classes>
-                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
-                            <Can-Set-Native-Method-Prefix>true</Can-Set-Native-Method-Prefix>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <mainClass>com.cn.agent.MyPreMainAgent</mainClass>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
                         <manifestEntries>
                             <Premain-Class>com.cn.agent.MyPreMainAgent</Premain-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
