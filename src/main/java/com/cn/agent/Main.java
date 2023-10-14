@@ -1,13 +1,16 @@
 package com.cn.agent;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+
 public class Main {
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        System.setProperty("java.class.path", System.getProperty("java.class.path") + ";" + "C:\\Users\\aleiw" +
-                "\\Desktop\\untitled\\target\\load-jar-agent-1.0-SNAPSHOT.jar");
-        System.out.println(System.getProperty("java.class.path"));
+    public static void main(String[] args) throws ClassNotFoundException, MalformedURLException {
+        URL url = new URL("file:/C:\\Users\\aleiw\\Desktop\\untitled\\src\\processor-1.0-SNAPSHOT.jar");
+        URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{url});
 
-        Class<?> aClass = Main.class.getClassLoader().loadClass("com.aiex.lei");
-
+        System.out.println("aaaaaaaaaaaaa");
     }
 
 }
