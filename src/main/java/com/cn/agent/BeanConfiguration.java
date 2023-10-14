@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 @Configurable
 public class BeanConfiguration {
     @Bean
-    public ShowmePorosser getshow(){
-        return new ShowmePorosser();
+    public ShowMeProcessor getShow(){
+        return new ShowMeProcessor();
     }
 }

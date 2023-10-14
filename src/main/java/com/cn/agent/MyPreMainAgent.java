@@ -20,21 +20,42 @@ import java.util.Properties;
 
 public class MyPreMainAgent {
     public static void premain(String agentArgs, Instrumentation inst) {
-        if (true){
+        boolean replaceClassLoader = false;
+        String filePath = "";
+        String[] split = agentArgs.split(";");
+        for (String s : split) {
+            String[] split1 = s.split("=");
+            if (split1.length < 2) {
+                continue;
+            }
+            if (split1[0].equals("replaceClassLoader") && split1[1].equals("true")) {
+                replaceClassLoader = true;
+            }
+            if (split1[0].equals("filePath")) {
+                filePath = split1[1];
+            }
+        }
+        if (filePath.equals("")) {
+            return;
+        }
+        if (replaceClassLoader) {
             try {
                 // 替换当前上下文的classloader
-                URL url = new URL("file:/"+agentArgs);
-                URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{url}, Thread.currentThread().getContextClassLoader());
+                URL url = new URL("file:/" + filePath);
+                URLClassLoader urlClassLoader = new URLClassLoader(new URL[]{url},
+                        Thread.currentThread().getContextClassLoader());
                 Thread.currentThread().setContextClassLoader(urlClassLoader);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
                 System.err.println("modify classloader fail");
             }
         }
-
+        if (System.getProperty("os.name").toLowerCase().contains("windows")){
+            filePath = filePath.replace("\\","\\\\");
+        }
+        String finalFilePath = filePath;
         inst.addTransformer((loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
-            String finalAgentArgs  = agentArgs.replace("\\","\\\\");
-            String targetPath = "\""+ finalAgentArgs +"\"";
+            String targetPath = "\""+ finalFilePath +"\"";
             if (className.equals("org/apache/catalina/mbeans/MBeanFactory")) {
                 // tomcat server
                 System.out.println("tomcat server");
@@ -135,7 +156,6 @@ public class MyPreMainAgent {
                                     "            }\n" +
                                     "        }\n" +
                                     "}");
-                    System.out.println(ctMethod.getName());
                     return ctClass.toBytecode();
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
