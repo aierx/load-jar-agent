@@ -14,6 +14,24 @@ import java.net.URLClassLoader;
 public class MyPreMainAgent {
     public static void premain(String agentArgs, Instrumentation inst) {
         boolean replaceClassLoader = false;
+        if(agentArgs==null|| agentArgs.isEmpty()){
+            inst.addTransformer((loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
+                if (className.equals("org.apache.dubbo.common.extension.AdaptiveClassCodeGenerator".replaceAll("\\.","/"))) {
+                    try {
+                        ClassPool classPool = ClassPool.getDefault();
+                        CtClass ctClass = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
+                        CtMethod ctMethod = ctClass.getDeclaredMethod("generate");
+                        ctMethod.insertAfter("String str = $_;\n" + "java.util.regex.Matcher m1 = java.util.regex.Pattern.compile(\"package +(.*);\").matcher(str);\n" + "java.util.regex.Matcher m2 = java.util.regex.Pattern.compile(\"class +(.*?) \").matcher(str);\n" + "if (m1.find() && m2.find()) {\n" + "    String fileDir = System.getProperty(\"user.dir\") + \"/src/main/java/\"+m1.group(1).replaceAll(\"\\\\.\", \"/\")+\"/\"+ m2.group(1)+\".java\";\n" + "    java.io.File file = new java.io.File(fileDir);\n" + "    if (!file.exists()) {\n" + "        if (!file.getParentFile().exists()) {\n" + "            //创建上级目录\n" + "            file.getParentFile().mkdirs();\n" + "        }\n" + "        try {\n" + "            //在上级目录里创建文件\n" + "            file.createNewFile();\n" + "            java.io.FileOutputStream fos = new java.io.FileOutputStream(file);\n" + "            fos.write(str.getBytes(java.nio.charset.StandardCharsets.UTF_8));\n" + "        } catch (Exception e) {\n" + "            e.printStackTrace();\n" + "        }\n" + "    }\n" + "} else {\n" + "    System.out.println(\"not match\");\n" + "}");
+                        return ctClass.toBytecode();
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        System.out.println("insert class fail");
+                    }
+                }
+                return classfileBuffer;
+            });
+            return;
+        }
         String filePath = "";
         String[] split = agentArgs.split(";");
         for (String s : split) {
